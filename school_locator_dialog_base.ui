@@ -12,6 +12,8 @@
       <string>Input Layers</string>
      </property>
      <layout class="QFormLayout" name="formLayoutInputs">
+
+      <!-- Population Layer -->
       <item row="0" column="0">
        <widget class="QLabel" name="labelPopulationLayer">
         <property name="text">
@@ -20,8 +22,14 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="combo_population_layer"/>
+       <widget class="QPushButton" name="btn_population_layer">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
       </item>
+
+      <!-- School Layer -->
       <item row="1" column="0">
        <widget class="QLabel" name="labelSchoolLayer">
         <property name="text">
@@ -30,8 +38,14 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QComboBox" name="combo_school_layer"/>
+       <widget class="QPushButton" name="btn_school_layer">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
       </item>
+
+      <!-- River Layer -->
       <item row="2" column="0">
        <widget class="QLabel" name="labelRiverLayer">
         <property name="text">
@@ -40,27 +54,41 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QComboBox" name="combo_river_layer"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="labelDistrictLayer">
+       <widget class="QPushButton" name="btn_river_layer">
         <property name="text">
-         <string>District Layer:</string>
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Boundary Layer -->
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelBoundaryLayer">
+        <property name="text">
+         <string>Boundary Layer:</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QComboBox" name="combo_district_layer"/>
+       <widget class="QPushButton" name="btn_boundary_layer">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
       </item>
+
      </layout>
     </widget>
    </item>
+
+   <!-- Parameters Section -->
    <item>
     <widget class="QGroupBox" name="groupBoxParameters">
      <property name="title">
       <string>Parameters</string>
      </property>
      <layout class="QFormLayout" name="formLayoutParameters">
+
       <item row="0" column="0">
        <widget class="QLabel" name="labelPopulationThreshold">
         <property name="text">
@@ -71,6 +99,7 @@
       <item row="0" column="1">
        <widget class="QSpinBox" name="spin_population_threshold"/>
       </item>
+
       <item row="1" column="0">
        <widget class="QLabel" name="labelDistanceFromSchools">
         <property name="text">
@@ -81,6 +110,7 @@
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="spin_distance_from_schools"/>
       </item>
+
       <item row="2" column="0">
        <widget class="QLabel" name="labelRestrictedZoneBuffer">
         <property name="text">
@@ -91,6 +121,7 @@
       <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="spin_restricted_zone_buffer"/>
       </item>
+
       <item row="3" column="0">
        <widget class="QLabel" name="labelRiverDistanceBuffer">
         <property name="text">
@@ -101,9 +132,12 @@
       <item row="3" column="1">
        <widget class="QDoubleSpinBox" name="spin_river_distance_buffer"/>
       </item>
+
      </layout>
     </widget>
    </item>
+
+   <!-- Buttons Section -->
    <item>
     <layout class="QHBoxLayout" name="horizontalLayoutButtons">
      <item>
@@ -122,6 +156,8 @@
      </item>
     </layout>
    </item>
+
+   <!-- Status Message -->
    <item>
     <widget class="QLabel" name="lbl_status_message">
      <property name="text">

@@ -16,58 +16,88 @@ class Ui_SchoolLocatorDialog(object):
         SchoolLocatorDialog.setObjectName("SchoolLocatorDialog")
         self.verticalLayout = QtWidgets.QVBoxLayout(SchoolLocatorDialog)
         self.verticalLayout.setObjectName("verticalLayout")
+
+        # Input Layers Group
         self.groupBoxInputs = QtWidgets.QGroupBox(SchoolLocatorDialog)
         self.groupBoxInputs.setObjectName("groupBoxInputs")
         self.formLayoutInputs = QtWidgets.QFormLayout(self.groupBoxInputs)
         self.formLayoutInputs.setObjectName("formLayoutInputs")
+
+        # Population Data Input
         self.labelPopulationLayer = QtWidgets.QLabel(self.groupBoxInputs)
         self.labelPopulationLayer.setObjectName("labelPopulationLayer")
         self.formLayoutInputs.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.labelPopulationLayer)
-        self.combo_population_layer = QtWidgets.QComboBox(self.groupBoxInputs)
-        self.combo_population_layer.setObjectName("combo_population_layer")
-        self.formLayoutInputs.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.combo_population_layer)
+        self.btn_population_layer = QtWidgets.QPushButton(self.groupBoxInputs)
+        self.btn_population_layer.setObjectName("btn_population_layer")
+        self.formLayoutInputs.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.btn_population_layer)
+
+        # School Layer Input
         self.labelSchoolLayer = QtWidgets.QLabel(self.groupBoxInputs)
         self.labelSchoolLayer.setObjectName("labelSchoolLayer")
         self.formLayoutInputs.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.labelSchoolLayer)
-        self.combo_school_layer = QtWidgets.QComboBox(self.groupBoxInputs)
-        self.combo_school_layer.setObjectName("combo_school_layer")
-        self.formLayoutInputs.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.combo_school_layer)
-        self.labelLandUseLayer = QtWidgets.QLabel(self.groupBoxInputs)
-        self.labelLandUseLayer.setObjectName("labelLandUseLayer")
-        self.formLayoutInputs.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.labelLandUseLayer)
-        self.combo_land_use_layer = QtWidgets.QComboBox(self.groupBoxInputs)
-        self.combo_land_use_layer.setObjectName("combo_land_use_layer")
-        self.formLayoutInputs.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.combo_land_use_layer)
-        self.labelAreaLayer = QtWidgets.QLabel(self.groupBoxInputs)
-        self.labelAreaLayer.setObjectName("labelAreaLayer")
-        self.formLayoutInputs.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.labelAreaLayer)
-        self.combo_area_layer = QtWidgets.QComboBox(self.groupBoxInputs)
-        self.combo_area_layer.setObjectName("combo_area_layer")
-        self.formLayoutInputs.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.combo_area_layer)
+        self.btn_school_layer = QtWidgets.QPushButton(self.groupBoxInputs)
+        self.btn_school_layer.setObjectName("btn_school_layer")
+        self.formLayoutInputs.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.btn_school_layer)
+
+        # River Layer Input
+        self.labelRiverLayer = QtWidgets.QLabel(self.groupBoxInputs)
+        self.labelRiverLayer.setObjectName("labelRiverLayer")
+        self.formLayoutInputs.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.labelRiverLayer)
+        self.btn_river_layer = QtWidgets.QPushButton(self.groupBoxInputs)
+        self.btn_river_layer.setObjectName("btn_river_layer")
+        self.formLayoutInputs.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.btn_river_layer)
+
+        # Boundary Layer Input
+        self.labelBoundaryLayer = QtWidgets.QLabel(self.groupBoxInputs)
+        self.labelBoundaryLayer.setObjectName("labelBoundaryLayer")
+        self.formLayoutInputs.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.labelBoundaryLayer)
+        self.btn_boundary_layer = QtWidgets.QPushButton(self.groupBoxInputs)
+        self.btn_boundary_layer.setObjectName("btn_boundary_layer")
+        self.formLayoutInputs.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.btn_boundary_layer)
+
         self.verticalLayout.addWidget(self.groupBoxInputs)
+
+        # Parameters Group
         self.groupBoxParameters = QtWidgets.QGroupBox(SchoolLocatorDialog)
         self.groupBoxParameters.setObjectName("groupBoxParameters")
         self.formLayoutParameters = QtWidgets.QFormLayout(self.groupBoxParameters)
         self.formLayoutParameters.setObjectName("formLayoutParameters")
+
+        # Population Threshold Parameter
         self.labelPopulationThreshold = QtWidgets.QLabel(self.groupBoxParameters)
         self.labelPopulationThreshold.setObjectName("labelPopulationThreshold")
         self.formLayoutParameters.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.labelPopulationThreshold)
         self.spin_population_threshold = QtWidgets.QSpinBox(self.groupBoxParameters)
         self.spin_population_threshold.setObjectName("spin_population_threshold")
         self.formLayoutParameters.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.spin_population_threshold)
+
+        # Distance from Schools Parameter
         self.labelDistanceFromSchools = QtWidgets.QLabel(self.groupBoxParameters)
         self.labelDistanceFromSchools.setObjectName("labelDistanceFromSchools")
         self.formLayoutParameters.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.labelDistanceFromSchools)
         self.spin_distance_from_schools = QtWidgets.QDoubleSpinBox(self.groupBoxParameters)
         self.spin_distance_from_schools.setObjectName("spin_distance_from_schools")
         self.formLayoutParameters.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.spin_distance_from_schools)
+
+        # Restricted Zone Buffer Parameter
         self.labelRestrictedZoneBuffer = QtWidgets.QLabel(self.groupBoxParameters)
         self.labelRestrictedZoneBuffer.setObjectName("labelRestrictedZoneBuffer")
         self.formLayoutParameters.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.labelRestrictedZoneBuffer)
         self.spin_restricted_zone_buffer = QtWidgets.QDoubleSpinBox(self.groupBoxParameters)
         self.spin_restricted_zone_buffer.setObjectName("spin_restricted_zone_buffer")
         self.formLayoutParameters.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.spin_restricted_zone_buffer)
+
+        # River Distance Buffer Parameter
+        self.labelRiverDistanceBuffer = QtWidgets.QLabel(self.groupBoxParameters)
+        self.labelRiverDistanceBuffer.setObjectName("labelRiverDistanceBuffer")
+        self.formLayoutParameters.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.labelRiverDistanceBuffer)
+        self.spin_river_distance_buffer = QtWidgets.QDoubleSpinBox(self.groupBoxParameters)
+        self.spin_river_distance_buffer.setObjectName("spin_river_distance_buffer")
+        self.formLayoutParameters.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.spin_river_distance_buffer)
+
         self.verticalLayout.addWidget(self.groupBoxParameters)
+
+        # Buttons
         self.horizontalLayoutButtons = QtWidgets.QHBoxLayout()
         self.horizontalLayoutButtons.setObjectName("horizontalLayoutButtons")
         self.btn_run_analysis = QtWidgets.QPushButton(SchoolLocatorDialog)
@@ -77,6 +107,8 @@ class Ui_SchoolLocatorDialog(object):
         self.btn_close.setObjectName("btn_close")
         self.horizontalLayoutButtons.addWidget(self.btn_close)
         self.verticalLayout.addLayout(self.horizontalLayoutButtons)
+
+        # Status Message
         self.lbl_status_message = QtWidgets.QLabel(SchoolLocatorDialog)
         self.lbl_status_message.setObjectName("lbl_status_message")
         self.verticalLayout.addWidget(self.lbl_status_message)
@@ -89,13 +121,18 @@ class Ui_SchoolLocatorDialog(object):
         SchoolLocatorDialog.setWindowTitle(_translate("SchoolLocatorDialog", "School Locator"))
         self.groupBoxInputs.setTitle(_translate("SchoolLocatorDialog", "Input Layers"))
         self.labelPopulationLayer.setText(_translate("SchoolLocatorDialog", "Population Data:"))
+        self.btn_population_layer.setText(_translate("SchoolLocatorDialog", "..."))
         self.labelSchoolLayer.setText(_translate("SchoolLocatorDialog", "Existing Schools:"))
-        self.labelLandUseLayer.setText(_translate("SchoolLocatorDialog", "Land Use/Zoning:"))
-        self.labelAreaLayer.setText(_translate("SchoolLocatorDialog", "Area Boundary:"))
+        self.btn_school_layer.setText(_translate("SchoolLocatorDialog", "..."))
+        self.labelRiverLayer.setText(_translate("SchoolLocatorDialog", "River Layers:"))
+        self.btn_river_layer.setText(_translate("SchoolLocatorDialog", "..."))
+        self.labelBoundaryLayer.setText(_translate("SchoolLocatorDialog", "Boundary Layer:"))
+        self.btn_boundary_layer.setText(_translate("SchoolLocatorDialog", "..."))
         self.groupBoxParameters.setTitle(_translate("SchoolLocatorDialog", "Parameters"))
         self.labelPopulationThreshold.setText(_translate("SchoolLocatorDialog", "Population Threshold:"))
         self.labelDistanceFromSchools.setText(_translate("SchoolLocatorDialog", "Max Distance from Schools:"))
         self.labelRestrictedZoneBuffer.setText(_translate("SchoolLocatorDialog", "Restricted Zone Buffer:"))
+        self.labelRiverDistanceBuffer.setText(_translate("SchoolLocatorDialog", "Min Distance from Rivers:"))
         self.btn_run_analysis.setText(_translate("SchoolLocatorDialog", "Run Analysis"))
         self.btn_close.setText(_translate("SchoolLocatorDialog", "Close"))
         self.lbl_status_message.setText(_translate("SchoolLocatorDialog", "Status: Ready"))
