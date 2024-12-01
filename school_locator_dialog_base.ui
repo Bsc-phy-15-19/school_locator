@@ -33,24 +33,24 @@
        <widget class="QComboBox" name="combo_school_layer"/>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="labelLandUseLayer">
+       <widget class="QLabel" name="labelRiverLayer">
         <property name="text">
-         <string>Land Use/Zoning:</string>
+         <string>River Layers:</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QComboBox" name="combo_land_use_layer"/>
+       <widget class="QComboBox" name="combo_river_layer"/>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="labelAreaLayer">
+       <widget class="QLabel" name="labelDistrictLayer">
         <property name="text">
-         <string>Area Boundary:</string>
+         <string>District Layer:</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QComboBox" name="combo_area_layer"/>
+       <widget class="QComboBox" name="combo_district_layer"/>
       </item>
      </layout>
     </widget>
@@ -90,6 +90,16 @@
       </item>
       <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="spin_restricted_zone_buffer"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelRiverDistanceBuffer">
+        <property name="text">
+         <string>Min Distance from Rivers:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QDoubleSpinBox" name="spin_river_distance_buffer"/>
       </item>
      </layout>
     </widget>

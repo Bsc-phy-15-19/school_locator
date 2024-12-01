@@ -34,3 +34,4 @@ def classFactory(iface):  # pylint: disable=invalid-name
     #
     from .school_locator import SchoolLocator
     return SchoolLocator(iface)
+    

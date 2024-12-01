@@ -1,14 +1,15 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QMessageBox, QFileDialog
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from qgis.core import QgsProcessingFeedback, QgsProject, QgsVectorLayer, QgsDataSourceUri
+import psycopg2  # PostgreSQL adapter for Python
 import processing
+import os.path
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .school_locator_dialog import SchoolLocatorDialog
-import os.path
 
 
 class SchoolLocator:
@@ -34,21 +35,30 @@ class SchoolLocator:
         self.menu = self.tr(u'&school_locator')
         self.dlg = None
 
+        # Database connection parameters
+        self.db_params = {
+            'database': 'locator',
+            'user': 'postgres',
+            'password': 'wedson123',
+            'host': 'localhost',
+            'port': '5432'
+        }
+
     def tr(self, message):
         """Translate a string using Qt translation API."""
         return QCoreApplication.translate('SchoolLocator', message)
 
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None,
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None,
     ):
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
@@ -85,6 +95,7 @@ class SchoolLocator:
             self.iface.removeToolBarIcon(action)
 
     def run(self):
+        """Display the plugin dialog and populate input layers."""
         if not self.dlg:
             self.dlg = SchoolLocatorDialog()
 
@@ -92,124 +103,167 @@ class SchoolLocator:
             self.dlg.btn_close.clicked.connect(self.close_dialog)
             self.dlg.btn_run_analysis.clicked.connect(self.run_analysis)
 
-            # Add file selection for each input
-            self.dlg.combo_population_layer.currentIndexChanged.connect(
-                lambda: self.import_to_database('population'))
-            self.dlg.combo_school_layer.currentIndexChanged.connect(
-                lambda: self.import_to_database('school'))
-            self.dlg.combo_land_use_layer.currentIndexChanged.connect(
-                lambda: self.import_to_database('land_use'))
-            self.dlg.combo_area_layer.currentIndexChanged.connect(
-                lambda: self.import_to_database('area'))
+            # Populate the combo boxes with available layers in QGIS
+            self.populate_input_layers()
 
         self.dlg.show()
 
     def close_dialog(self):
         self.dlg.close()
 
-    def import_to_database(self, layer_type):
-        """Handles importing shapefiles to the database."""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self.dlg,
-            "Select Shapefile",
-            "",
-            "Shapefiles (*.shp)"
-        )
+    def connect_to_postgis(self):
+        """Connect to the PostGIS database."""
+        try:
+            conn = psycopg2.connect(**self.db_params)
+            return conn
+        except Exception as e:
+            QMessageBox.critical(self.dlg, "Database Connection Error", str(e))
+            return None
 
-        if not file_path:
-            return
-
-        # Import to database (PostGIS example)
-        feedback = QgsProcessingFeedback()
-        table_name = f"{layer_type}_layer"
+    def get_districts(self):
+        """Retrieve a list of districts from the database."""
+        conn = self.connect_to_postgis()
+        
+        if conn is None:
+            return []
 
         try:
-            processing.run("qgis:importintopostgis", {
-                'INPUT': file_path,
-                'DATABASE': 'locator',  # Connection name from QGIS DB Manager
-                'SCHEMA': 'public',
-                'TABLE': locator,
-                'OVERWRITE': True,
-                'PRIMARY_KEY': 'id',
-                'LOWERCASE_NAMES': True,
-                'DROP_STRING_LENGTH': False,
-                'CODING': 'UTF-8'
-            }, feedback=feedback)
-
-            QMessageBox.information(self.dlg, "Import Successful", f"{layer_type.capitalize()} layer imported successfully.")
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT name FROM districts;")
+                districts = cursor.fetchall()
+                return districts
         except Exception as e:
-            QMessageBox.critical(self.dlg, "Import Error", f"Failed to import {layer_type} layer: {str(e)}")
+            QMessageBox.critical(self.dlg, "Error Fetching Districts", str(e))
+            return []
+        finally:
+            conn.close()
+
+    def load_layer_from_postgis(self, uri, schema, table, geometry_column):
+        """Loads a layer from PostGIS."""
+        uri.setDataSource(schema, table, geometry_column)
+        
+        layer = QgsVectorLayer(uri.uri(), table, "postgres")
+        
+        if not layer.isValid():
+            raise Exception(f"Failed to load layer: {table}")
+        
+        return layer
+
+    def populate_input_layers(self):
+        """Populate combo boxes with available layers in QGIS."""
+        # Clear combo boxes before populating them
+        self.dlg.combo_population_layer.clear()
+        self.dlg.combo_school_layer.clear()
+        self.dlg.combo_river_layer.clear()
+        self.dlg.combo_district_layer.clear()
+
+        # Populate combo boxes with layers available in QGIS
+        for layer in QgsProject.instance().mapLayers().values():
+            if isinstance(layer, QgsVectorLayer):  # Ensure it's a vector layer
+                self.dlg.combo_population_layer.addItem(layer.name())
+                self.dlg.combo_school_layer.addItem(layer.name())
+                self.dlg.combo_river_layer.addItem(layer.name())
+                self.dlg.combo_district_layer.addItem(layer.name())
 
     def run_analysis(self):
-        """Executes spatial analysis logic on database layers."""
-        # Fetch user inputs
-        population_layer_name = 'population_layer'
-        school_layer_name = 'school_layer'
-        land_use_layer_name = 'land_use_layer'
-        area_layer_name = 'area_layer'
-        population_threshold = self.dlg.spin_population_threshold.value()
-        max_distance = self.dlg.spin_distance_from_schools.value()
-        buffer_distance = self.dlg.spin_restricted_zone_buffer.value()
-
-        # Validate inputs
-        if not all([population_layer_name, school_layer_name, land_use_layer_name, area_layer_name]):
-            QMessageBox.warning(self.dlg, "Input Error", "Please ensure all layers have been imported to the database.")
-            return
-
+        """Runs the school suitability analysis."""
         feedback = QgsProcessingFeedback()
 
         try:
-            # Step 1: Clip population and land use layers by the area boundary
+            # Connect to the PostGIS database
+            uri = QgsDataSourceUri()
+
+            # Correct connection setup without keyword arguments
+            uri.setConnection(
+                self.db_params['host'],        # Host
+                self.db_params['port'],        # Port
+                self.db_params['database'],    # Database name
+                self.db_params['user'],        # User
+                self.db_params['password']     # Password
+            )
+
+            # Load layers from the database
+            district_layer = self.load_layer_from_postgis(uri, "public", "districts", "geom")
+            population_layer = self.load_layer_from_postgis(uri, "public", "population", "geom")
+            school_layer = self.load_layer_from_postgis(uri, "public", "schools", "geom")
+            rivers_layer = self.load_layer_from_postgis(uri, "public", "rivers", "geom")
+
+            # Get user input for district and distances
+            selected_district = self.dlg.combo_district_layer.currentText()
+
+            # Get user-defined distance values
+            school_distance = float(self.dlg.spin_distance_from_schools.text())  # Distance to existing schools in meters
+            river_distance = float(self.dlg.spin_river_distance_buffer.text())  # Distance to rivers in meters
+
+            # Step 1: Extract the selected district
+            district = processing.run("native:extractbyattribute", {
+                'INPUT': district_layer,
+                'FIELD': 'name',  # Replace with the district name field
+                'OPERATOR': '=',
+                'VALUE': selected_district,
+                'OUTPUT': 'memory:selected_district'
+            }, feedback=feedback)['OUTPUT']
+
+            # Step 2: Clip population data to the selected district
             clipped_population = processing.run("native:clip", {
-                'INPUT': f"public.{population_layer_name}",
-                'OVERLAY': f"public.{area_layer_name}",
-                'OUTPUT': 'memory:'
+                'INPUT': population_layer,
+                'OVERLAY': district,
+                'OUTPUT': 'memory:clipped_population'
             }, feedback=feedback)['OUTPUT']
 
-            clipped_land_use = processing.run("native:clip", {
-                'INPUT': f"public.{land_use_layer_name}",
-                'OVERLAY': f"public.{area_layer_name}",
-                'OUTPUT': 'memory:'
+            # Step 3: Filter areas with population > user-defined threshold (e.g., 1000)
+            high_population_threshold = 1000  # This can be adjusted or made dynamic based on user input.
+            high_population = processing.run("native:extractbyattribute", {
+                'INPUT': clipped_population,
+                'FIELD': 'population',  # Adjust field name based on your table
+                'OPERATOR': '>=',
+                'VALUE': high_population_threshold,
+                'OUTPUT': 'memory:high_population'
             }, feedback=feedback)['OUTPUT']
 
-            # Step 2: Buffer existing schools
+            # Step 4: Buffer existing schools by user-defined distance
             school_buffer = processing.run("native:buffer", {
-                'INPUT': f"public.{school_layer_name}",
-                'DISTANCE': buffer_distance,
+                'INPUT': school_layer,
+                'DISTANCE': school_distance,
                 'SEGMENTS': 5,
                 'DISSOLVE': True,
-                'OUTPUT': 'memory:'
+                'OUTPUT': 'memory:school_buffer'
             }, feedback=feedback)['OUTPUT']
 
-            # Step 3: Remove buffered areas (unsuitable zones)
-            available_land = processing.run("native:difference", {
-                'INPUT': clipped_land_use,
-                'OVERLAY': school_buffer,
-                'OUTPUT': 'memory:'
+            # Step 5: Buffer rivers by user-defined distance
+            river_buffer = processing.run("native:buffer", {
+                'INPUT': rivers_layer,
+                'DISTANCE': river_distance,
+                'SEGMENTS': 5,
+                'DISSOLVE': True,
+                'OUTPUT': 'memory:river_buffer'
             }, feedback=feedback)['OUTPUT']
 
-            # Step 4: Filter population areas by threshold
-            suitable_population = processing.run("native:extractbyattribute", {
-                'INPUT': clipped_population,
-                'FIELD': 'population',
-                'OPERATOR': '>=',
-                'VALUE': population_threshold,
-                'OUTPUT': 'memory:'
+            # Step 6: Merge school and river buffers
+            combined_buffer = processing.run("native:mergevectorlayers", {
+                'LAYERS': [school_buffer, river_buffer],
+                'OUTPUT': 'memory:combined_buffer'
             }, feedback=feedback)['OUTPUT']
 
-            # Step 5: Intersect suitable population areas with available land
-            suitable_locations = processing.run("native:intersection", {
-                'INPUT': suitable_population,
-                'OVERLAY': available_land,
-                'OUTPUT': 'memory:'
+            # Step 7: Remove unsuitable areas (areas with high population within buffers)
+            suitable_areas = processing.run("native:difference", {
+                'INPUT': high_population,
+                'OVERLAY': combined_buffer,
+                'OUTPUT': 'memory:suitable_areas'
             }, feedback=feedback)['OUTPUT']
 
-            # Add the result to the QGIS project
-            QgsProject.instance().addMapLayer(suitable_locations)
+            # Step 8: Clip suitable areas to district boundary
+            final_suitable_areas = processing.run("native:clip", {
+                'INPUT': suitable_areas,
+                'OVERLAY': district,
+                'OUTPUT': 'memory:final_suitable_areas'
+            }, feedback=feedback)['OUTPUT']
 
-            self.dlg.lbl_status_message.setText("Status: Analysis complete.")
-            QMessageBox.information(self.dlg, "Analysis Complete", "Suitable locations have been identified.")
+            # Add the final suitable areas to QGIS
+            suitable_layer = QgsVectorLayer(final_suitable_areas, "Suitable Areas", "memory")
+            QgsProject.instance().addMapLayer(suitable_layer)
+
+            QMessageBox.information(self.dlg, "Analysis Complete", "Suitable areas for schools identified.")
 
         except Exception as e:
-            self.dlg.lbl_status_message.setText("Status: Analysis failed.")
-            QMessageBox.critical(self.dlg, "Analysis Error", f"An error occurred during the analysis: {str(e)}")
+            QMessageBox.critical(self.dlg, "Error", f"An error occurred: {str(e)}")
